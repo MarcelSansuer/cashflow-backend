@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: cachflow-backend
+  datasource:
+    url: jdbc:postgresql://localhost:5432/cachflow
+    username: cachflow
+    password: cachflow
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true
+
