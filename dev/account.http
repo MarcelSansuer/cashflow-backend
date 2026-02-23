@@ -1,0 +1,34 @@
+@accountId = 4ea0f808-28e7-4a28-9ed8-117fa15b93f0
+
+### create account
+POST http://localhost:8080/api/accounts
+Content-Type: application/json
+
+{
+  "ownerName": "Marcel",
+  "currency": "EUR"
+}
+###
+
+### Deposit
+POST http://localhost:8080/api/accounts/{{accountId}}/deposit
+Content-Type: application/json
+
+{
+  "amount": 100.00,
+  "currency": "EUR"
+}
+###
+
+### Withdraw
+POST http://localhost:8080/api/accounts/{{accountId}}/withdraw
+Content-Type: application/json
+
+{
+    "amount": 20.00,
+    "currency": "EUR"
+}
+
+### ballance
+GET http://localhost:8080/api/accounts/{{accountId}}/balance
+Content-Type: application/json
