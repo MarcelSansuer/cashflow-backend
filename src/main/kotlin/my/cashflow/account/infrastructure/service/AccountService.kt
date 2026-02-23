@@ -2,7 +2,6 @@ package my.cashflow.account.infrastructure.service
 
 import my.cashflow.account.domain.AccountAggregate
 import my.cashflow.account.domain.AccountId
-import my.cashflow.account.domain.DEFAULT_CURRENCY
 import my.cashflow.account.domain.Money
 import my.cashflow.account.infrastructure.AccountEventStore
 import org.springframework.stereotype.Service
@@ -16,7 +15,7 @@ class AccountService(
      * Opens a new account with the given owner name and currency. If no currency is provided, it defaults to EUR.
      *
      * @param ownerName The name of the account owner.
-     * @param currencyCode The currency code for the account (e.g., "USD", "EUR"). If null, defaults to EUR.
+     * @param currency The currency of the account (optional, defaults to EUR).
      * @return The ID of the newly opened account.
      *
      * @throws IllegalArgumentException if the owner name is blank or if the currency is invalid.
@@ -24,12 +23,9 @@ class AccountService(
      */
     override fun openAccount(
         ownerName: String,
-        currencyCode: String?
+        currency: Currency
     ): AccountAggregate {
         val id = AccountId.new()
-
-        val currency = currencyCode?.let { Currency.getInstance(it) } ?: DEFAULT_CURRENCY
-
         val (aggregate, event) = AccountAggregate.create(id, ownerName, currency)
 
         eventStore.appendEvents(id, listOf(event))

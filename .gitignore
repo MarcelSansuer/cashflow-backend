@@ -49,3 +49,7 @@ Thumbs.db
 # Docker
 # =========================
 docker-compose.override.yml
+
+
+./note.md
+/note.md
