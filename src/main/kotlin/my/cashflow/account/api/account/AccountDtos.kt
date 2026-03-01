@@ -1,4 +1,6 @@
-package my.cashflow.account.api
+package my.cashflow.account.api.account
+
+import java.util.UUID
 
 data class OpenAccountRequest(
     val ownerName: String,
@@ -7,6 +9,7 @@ data class OpenAccountRequest(
 
 data class OpenAccountResponse(
     val accountId: String,
+    val ownerUserId: UUID,
     val ownerName: String,
     val initialBalance: Double,
     val currency: String
@@ -19,6 +22,7 @@ data class DepositRequest(
 
 data class DepositResponse(
     val accountId: String,
+    val ownerUserId: UUID,
     val amount: Double,
     val newBalance: Double,
     val currency: String
@@ -31,17 +35,15 @@ data class WithdrawRequest(
 
 data class WithdrawResponse(
     val accountId: String,
+    val ownerUserId: UUID,
     val amount: Double,
     val newBalance: Double,
     val currency: String
 )
 
-data class BalanceRequest(
-    val accountId: String
-)
-
 data class BalanceResponse(
     val accountId: String,
+    val ownerUserId: UUID,
     val amount: Double,
     val currency: String
 )

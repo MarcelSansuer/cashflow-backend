@@ -1,5 +1,6 @@
-package my.cashflow.account.domain
+package my.cashflow.account.domain.account
 
+import my.cashflow.account.domain.Money
 import java.time.Instant
 
 sealed class AccountEvent {

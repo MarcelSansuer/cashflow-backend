@@ -1,9 +1,9 @@
-package my.cashflow.account.infrastructure.service
+package my.cashflow.account.infrastructure.services.account
 
-import my.cashflow.account.domain.AccountAggregate
-import my.cashflow.account.domain.AccountId
+import my.cashflow.account.domain.account.AccountAggregate
+import my.cashflow.account.domain.account.AccountId
 import my.cashflow.account.domain.Money
-import my.cashflow.account.infrastructure.AccountEventStore
+import my.cashflow.account.infrastructure.services.account.AccountEventStore
 import org.springframework.stereotype.Service
 import java.util.*
 

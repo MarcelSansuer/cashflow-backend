@@ -1,8 +1,13 @@
-package my.cashflow.account.infrastructure
+package my.cashflow.account.infrastructure.services.account
 
-import my.cashflow.account.domain.*
-import my.cashflow.account.infrastructure.repository.AccountEventEntity
-import my.cashflow.account.infrastructure.repository.AccountEventRepository
+import my.cashflow.account.domain.account.AccountClosed
+import my.cashflow.account.domain.account.AccountEvent
+import my.cashflow.account.domain.account.AccountEventEntity
+import my.cashflow.account.domain.account.AccountId
+import my.cashflow.account.domain.account.AccountOpened
+import my.cashflow.account.domain.account.MoneyDeposited
+import my.cashflow.account.domain.account.MoneyWithdrawn
+import my.cashflow.account.infrastructure.repository.account.AccountEventRepository
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import tools.jackson.databind.ObjectMapper
@@ -60,9 +65,9 @@ class AccountEventStore(
 
     private fun eventFlagFor(event: AccountEvent): String =
         when (event) {
-            is AccountOpened   -> "OPENED"
-            is MoneyDeposited  -> "DEPOSITED"
-            is MoneyWithdrawn  -> "WITHDRAWN"
-            is AccountClosed   -> "CLOSED"
+            is AccountOpened -> "OPENED"
+            is MoneyDeposited -> "DEPOSITED"
+            is MoneyWithdrawn -> "WITHDRAWN"
+            is AccountClosed -> "CLOSED"
         }
 }

@@ -1,10 +1,14 @@
-package my.cashflow.account.domain
+package my.cashflow.account.domain.account
 
+import my.cashflow.account.domain.DEFAULT_CURRENCY
+import my.cashflow.account.domain.Money
 import java.time.Instant
 import java.util.Currency
+import java.util.UUID
 
 class AccountAggregate private constructor(
     val id: AccountId,
+    val ownerUserId: UUID?,
     val ownerName: String?,
     val balance: Money,
     val closed: Boolean,
@@ -21,21 +25,28 @@ class AccountAggregate private constructor(
          * @return A pair containing the newly created AccountAggregate and the AccountOpened event.
          * @throws IllegalArgumentException if the owner name is blank or if the currency is invalid.
          */
-        fun create(id: AccountId, ownerName: String, currency: Currency = DEFAULT_CURRENCY): Pair<AccountAggregate, AccountOpened> {
-            val initialBalance = Money.zero(currency)
+        fun create(id: AccountId,ownerUserId: UUID, ownerName: String, currency: Currency = DEFAULT_CURRENCY): Pair<AccountAggregate, AccountOpened> {
+            val initialBalance = Money.Companion.zero(currency)
             val event = AccountOpened(
                 accountId = id,
+                ownerUserId = ownerUserId,
                 ownerName = ownerName,
                 initialBalance = initialBalance,
                 occurredAt = Instant.now()
             )
-            val aggregate = AccountAggregate(id, null, initialBalance, closed = false).applyEvent(event)
+            val aggregate = AccountAggregate(
+                id,
+                ownerUserId = ownerUserId,
+                null,
+                initialBalance,
+                closed = false
+            ).applyEvent(event)
             return aggregate to event
         }
 
         fun fromEvents(events: List<AccountEvent>): AccountAggregate {
             // Dummy-Startzustand; wird vom ersten AccountOpened überschrieben
-            var state = AccountAggregate(AccountId("DUMMY"), null, Money.zero(), closed = false)
+            var state = AccountAggregate(AccountId("DUMMY"), null, Money.Companion.zero(), closed = false)
             events.forEach { state = state.applyEvent(it) }
             return state
         }
@@ -75,7 +86,7 @@ class AccountAggregate private constructor(
         requireGreaterThanZero(amount)
 
         // wirft selbst eine Exception, wenn nicht genug Guthaben
-        Money.checkInsufficientFunds(balance, amount)
+        Money.Companion.checkInsufficientFunds(balance, amount)
 
         val event = MoneyWithdrawn(
             accountId = id,

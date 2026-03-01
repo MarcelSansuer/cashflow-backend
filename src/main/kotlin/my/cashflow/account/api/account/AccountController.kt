@@ -1,8 +1,8 @@
-package my.cashflow.account.api
+package my.cashflow.account.api.account
 
-import my.cashflow.account.api.mapper.AccountApiMapper
-import my.cashflow.account.domain.AccountId
-import my.cashflow.account.infrastructure.service.AccountServiceInterface
+import my.cashflow.account.api.account.mapper.AccountApiMapper
+import my.cashflow.account.domain.account.AccountId
+import my.cashflow.account.infrastructure.services.account.AccountServiceInterface
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 

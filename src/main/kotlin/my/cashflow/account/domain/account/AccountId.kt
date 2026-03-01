@@ -1,9 +1,8 @@
-package my.cashflow.account.domain
+package my.cashflow.account.domain.account
 
 import java.util.*
 
-@JvmInline
-value class AccountId(val value: String) {
+data class AccountId(val value: String) {
     companion object {
         fun new(): AccountId = AccountId(UUID.randomUUID().toString())
     }

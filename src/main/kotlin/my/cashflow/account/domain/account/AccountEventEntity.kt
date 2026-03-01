@@ -1,4 +1,4 @@
-package my.cashflow.account.infrastructure.repository
+package my.cashflow.account.domain.account
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
