@@ -1,0 +1,179 @@
+openapi: 3.1.0
+info:
+  title: OpenAPI definition
+  version: v0
+servers:
+- url: http://localhost:8080
+  description: Generated server url
+paths:
+  /api/accounts:
+    post:
+      tags:
+      - account-controller
+      operationId: openAccount
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OpenAccountRequest"
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OpenAccountResponse"
+  /api/accounts/{id}/withdraw:
+    post:
+      tags:
+      - account-controller
+      operationId: withdraw
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WithdrawRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/WithdrawResponse"
+  /api/accounts/{id}/deposit:
+    post:
+      tags:
+      - account-controller
+      operationId: deposit
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DepositRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/DepositResponse"
+  /api/accounts/{id}/close:
+    post:
+      tags:
+      - account-controller
+      operationId: closeAccount
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
+  /api/accounts/{id}/balance:
+    get:
+      tags:
+      - account-controller
+      operationId: getBalance
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BalanceResponse"
+components:
+  schemas:
+    OpenAccountRequest:
+      type: object
+      properties:
+        ownerName:
+          type: string
+        currency:
+          type: string
+    OpenAccountResponse:
+      type: object
+      properties:
+        accountId:
+          type: string
+        ownerName:
+          type: string
+        initialBalance:
+          type: number
+          format: double
+        currency:
+          type: string
+    WithdrawRequest:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: double
+        currency:
+          type: string
+    WithdrawResponse:
+      type: object
+      properties:
+        accountId:
+          type: string
+        amount:
+          type: number
+          format: double
+        newBalance:
+          type: number
+          format: double
+        currency:
+          type: string
+    DepositRequest:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: double
+        currency:
+          type: string
+    DepositResponse:
+      type: object
+      properties:
+        accountId:
+          type: string
+        amount:
+          type: number
+          format: double
+        newBalance:
+          type: number
+          format: double
+        currency:
+          type: string
+    BalanceResponse:
+      type: object
+      properties:
+        accountId:
+          type: string
+        amount:
+          type: number
+          format: double
+        currency:
+          type: string

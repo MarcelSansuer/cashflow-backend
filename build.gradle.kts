@@ -1,3 +1,7 @@
+import java.net.URL
+import java.nio.file.Files
+import java.nio.file.Paths
+
 plugins {
     kotlin("jvm") version "2.2.21"
     kotlin("plugin.spring") version "2.2.21"
@@ -26,6 +30,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("tools.jackson.module:jackson-module-kotlin")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui")
     runtimeOnly("org.postgresql:postgresql")
     testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
     testImplementation("org.springframework.boot:spring-boot-starter-restclient-test")
@@ -48,4 +53,33 @@ allOpen {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+tasks.register("downloadOpenApiYaml") {
+    group = "documentation"
+    description = "Downloads the OpenAPI YAML from the running Spring Boot app into resources/static"
+
+    val outputDir = "src/main/resources/static"
+    val outputFile = "$outputDir/openapi.yaml"
+    val openApiUrl = "http://localhost:8080/v3/api-docs.yaml" // Springdoc Endpoint
+
+    doLast {
+        println("Downloading OpenAPI spec from $openApiUrl ...")
+
+        try {
+            val url = URL(openApiUrl)
+            val content = url.readText()
+
+            // Ensure directory exists
+            Files.createDirectories(Paths.get(outputDir))
+
+            // Write file
+            Files.write(Paths.get(outputFile), content.toByteArray())
+
+            println("OpenAPI spec saved to $outputFile")
+        } catch (e: Exception) {
+            println("Error downloading OpenAPI spec: ${e.message}")
+            throw e
+        }
+    }
 }
