@@ -9,6 +9,7 @@ import java.util.UUID
 class AccountAggregate private constructor(
     val id: AccountId,
     val ownerUserId: UUID?,
+    val creatorId: UUID?,
     val ownerName: String?,
     val balance: Money,
     val closed: Boolean,
@@ -20,45 +21,54 @@ class AccountAggregate private constructor(
          * Initializes the account with a zero balance and generates an AccountOpened event.
          *
          * @param id The unique identifier for the account.
+         * @param ownerUserId The unique identifier for the user who owns the account.
+         * @param creatorId The unique identifier for the user who created the account.
          * @param ownerName The name of the account owner.
          * @param currency The currency of the account (optional, defaults to EUR).
          * @return A pair containing the newly created AccountAggregate and the AccountOpened event.
          * @throws IllegalArgumentException if the owner name is blank or if the currency is invalid.
          */
-        fun create(id: AccountId,ownerUserId: UUID, ownerName: String, currency: Currency = DEFAULT_CURRENCY): Pair<AccountAggregate, AccountOpened> {
+        fun create(
+            id: AccountId,
+            ownerUserId: UUID,
+            creatorId: UUID,
+            ownerName: String,
+            currency: Currency = DEFAULT_CURRENCY
+        ): Pair<AccountAggregate, AccountOpened> {
             val initialBalance = Money.Companion.zero(currency)
             val event = AccountOpened(
                 accountId = id,
                 ownerUserId = ownerUserId,
+                creatorId = creatorId,
                 ownerName = ownerName,
                 initialBalance = initialBalance,
                 occurredAt = Instant.now()
             )
-            val aggregate = AccountAggregate(
-                id,
-                ownerUserId = ownerUserId,
-                null,
-                initialBalance,
-                closed = false
-            ).applyEvent(event)
+            val aggregate = AccountAggregate(id, null, null, null, initialBalance, closed = false).applyEvent(event)
             return aggregate to event
         }
 
         fun fromEvents(events: List<AccountEvent>): AccountAggregate {
-            // Dummy-Startzustand; wird vom ersten AccountOpened überschrieben
-            var state = AccountAggregate(AccountId("DUMMY"), null, Money.Companion.zero(), closed = false)
+            require(events.isNotEmpty()) { "No events found for account" }
+            
+            // Der erste Event MUSS ein AccountOpened sein
+            val firstEvent = events.first()
+            require(firstEvent is AccountOpened) { "First event must be AccountOpened" }
+
+            var state = AccountAggregate(
+                id = firstEvent.accountId,
+                ownerUserId = null,
+                creatorId = null,
+                ownerName = null,
+                balance = Money.Companion.zero(),
+                closed = false
+            )
+            
             events.forEach { state = state.applyEvent(it) }
             return state
         }
     }
 
-    /**
-     * Add a deposit to the account. Validates that the amount is greater than zero and returns a new AccountAggregate
-     * with the updated balance, along with the MoneyDeposited event.
-     *
-     * @param amount The amount of money to deposit. Must be greater than zero.
-     * @return A pair containing the new AccountAggregate with the updated balance and the MoneyDepos
-     */
     fun deposit(amount: Money): Pair<AccountAggregate, MoneyDeposited> {
         requireNotClosed()
         requireGreaterThanZero(amount)
@@ -73,19 +83,10 @@ class AccountAggregate private constructor(
         return newState to event
     }
 
-    /**
-     * Withdraws a specified amount of money from the account. Validates that the amount is greater than zero and that there are sufficient funds in the account.
-     * Returns a new AccountAggregate with the updated balance, along with the MoneyWithdrawn event.
-     *
-     * @param amount The amount of money to withdraw. Must be greater than zero and less than or equal to the current balance.
-     * @return A pair containing the new AccountAggregate with the updated balance and the MoneyWithdrawn event.
-     * @throws IllegalArgumentException if the withdrawal amount is zero or negative, or if there are insufficient funds in the account.
-     */
     fun withdraw(amount: Money): Pair<AccountAggregate, MoneyWithdrawn> {
         requireNotClosed()
         requireGreaterThanZero(amount)
 
-        // wirft selbst eine Exception, wenn nicht genug Guthaben
         Money.Companion.checkInsufficientFunds(balance, amount)
 
         val event = MoneyWithdrawn(
@@ -98,12 +99,6 @@ class AccountAggregate private constructor(
         return newState to event
     }
 
-    /**
-     * Closes the account. Returns a new AccountAggregate with the same state (since we don't need to change any fields to represent a closed account)
-     * and an AccountClosed event.
-     *
-     * @return A pair containing the new AccountAggregate (which is the same as the current state) and the AccountClosed event.
-     */
     fun close(): Pair<AccountAggregate, AccountClosed> {
         requireNotClosed()
 
@@ -124,33 +119,21 @@ class AccountAggregate private constructor(
         require(!amount.isZero()) { "Amount must be greater than zero" }
     }
 
-    /**
-     * Creates a copy of the current AccountAggregate with the specified fields updated. This is a helper function to create new instances of AccountAggregate with modified state after applying events.
-     *
-     * @param id The ID of the account (defaults to the current ID).
-     * @param ownerName The name of the account owner (defaults to the current owner name
-     * @param balance The current balance of the account (defaults to the current balance).
-     * @param closed Whether the account is closed (defaults to the current closed status).
-     * @return A new AccountAggregate with the specified fields updated.
-     */
     private fun copy(
         id: AccountId = this.id,
+        ownerUserId: UUID? = this.ownerUserId,
+        creatorId: UUID? = this.creatorId,
         ownerName: String? = this.ownerName,
         balance: Money = this.balance,
         closed: Boolean = this.closed
-    ) = AccountAggregate(id, ownerName, balance, closed)
+    ) = AccountAggregate(id, ownerUserId, creatorId, ownerName, balance, closed)
 
-    /**
-     * Applies the given AccountEvent to the current state of the AccountAggregate and returns a new AccountAggregate with the updated state.
-     *
-     * @param event The AccountEvent to apply. Must be one of AccountOpened, MoneyDeposited, MoneyWithdrawn, or AccountClosed.
-     * @return A new AccountAggregate with the updated state after applying the event.
-     * @throws IllegalArgumentException if the event type is unknown or if there is an error while applying the event.
-     */
     private fun applyEvent(event: AccountEvent): AccountAggregate =
         when (event) {
             is AccountOpened -> AccountAggregate(
                 id = event.accountId,
+                ownerUserId = event.ownerUserId,
+                creatorId = event.creatorId,
                 ownerName = event.ownerName,
                 balance = event.initialBalance,
                 closed = false

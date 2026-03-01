@@ -11,6 +11,8 @@ sealed class AccountEvent {
 data class AccountOpened(
     override val accountId: AccountId,
     override val occurredAt: Instant,
+    val ownerUserId: java.util.UUID?,
+    val creatorId: java.util.UUID?,
     val ownerName: String,
     val initialBalance: Money
 ) : AccountEvent()

@@ -7,9 +7,14 @@ import java.util.Currency
 
 interface AccountServiceInterface {
 
-    fun openAccount(ownerName: String, currency: Currency): AccountAggregate
+    fun openAccount(
+        ownerUserId: java.util.UUID,
+        creatorId: java.util.UUID,
+        ownerName: String,
+        currency: Currency
+    ): AccountAggregate
 
-    fun getBalance(accountId: AccountId): Money
+    fun getBalance(accountId: AccountId): AccountAggregate
 
     fun deposit(accountId: AccountId, amount: Money): AccountAggregate
 

@@ -18,26 +18,31 @@ import java.util.*
 interface AccountApiMapper {
 
     @Mapping(target = "accountId", source = "aggregate.id")
+    @Mapping(target = "ownerUserId", source = "aggregate.ownerUserId")
+    @Mapping(target = "creatorId", source = "aggregate.creatorId")
     @Mapping(target = "initialBalance", source = "aggregate.balance.amount")
     @Mapping(target = "currency", source = "aggregate.balance.currency.currencyCode")
     fun toOpenAccountResponse(aggregate: AccountAggregate): OpenAccountResponse
 
-    @Mapping(target = "accountId", source = "accountId")
+    @Mapping(target = "accountId", source = "aggregate.id")
+    @Mapping(target = "ownerUserId", source = "aggregate.ownerUserId")
     @Mapping(target = "amount", source = "amount.amount")
-    @Mapping(target = "newBalance", source = "newBalance.amount")
-    @Mapping(target = "currency", source = "newBalance.currency.currencyCode")
-    fun toWithdrawResponse(accountId: AccountId, amount: Money, newBalance: Money): WithdrawResponse
+    @Mapping(target = "newBalance", source = "aggregate.balance.amount")
+    @Mapping(target = "currency", source = "aggregate.balance.currency.currencyCode")
+    fun toWithdrawResponse(aggregate: AccountAggregate, amount: Money): WithdrawResponse
 
-    @Mapping(target = "accountId", source = "accountId")
+    @Mapping(target = "accountId", source = "aggregate.id")
+    @Mapping(target = "ownerUserId", source = "aggregate.ownerUserId")
     @Mapping(target = "amount", source = "amount.amount")
-    @Mapping(target = "newBalance", source = "newBalance.amount")
-    @Mapping(target = "currency", source = "newBalance.currency.currencyCode")
-    fun toDepositResponse(accountId: AccountId, amount: Money, newBalance: Money): DepositResponse
+    @Mapping(target = "newBalance", source = "aggregate.balance.amount")
+    @Mapping(target = "currency", source = "aggregate.balance.currency.currencyCode")
+    fun toDepositResponse(aggregate: AccountAggregate, amount: Money): DepositResponse
 
-    @Mapping(target = "accountId", source = "accountId")
-    @Mapping(target = "amount", source = "balance.amount")
-    @Mapping(target = "currency", source = "balance.currency.currencyCode")
-    fun toBalanceResponse(accountId: AccountId, balance: Money): BalanceResponse
+    @Mapping(target = "accountId", source = "aggregate.id")
+    @Mapping(target = "ownerUserId", source = "aggregate.ownerUserId")
+    @Mapping(target = "amount", source = "aggregate.balance.amount")
+    @Mapping(target = "currency", source = "aggregate.balance.currency.currencyCode")
+    fun toBalanceResponse(aggregate: AccountAggregate): BalanceResponse
 
     fun toCurrency(code: String?): Currency =
         code?.let { Currency.getInstance(it) } ?: DEFAULT_CURRENCY

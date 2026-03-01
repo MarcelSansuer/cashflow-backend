@@ -1,8 +1,25 @@
+### admin user
 POST http://localhost:8080/api/users
 Content-Type: application/json
 
 {
-  "username": "marcel",
-  "email": "marcel@example.com",
+  "userName": "TonyStark",
+  "email": "TonyStark@example.com",
+  "firstName": "Tony",
+  "lastName": "Stark",
+  "age": 48,
   "password": "secret123"
+}
+
+### customer user
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+"userName": "HarryPotter",
+"email": "harry@gmail.com",
+"firstName": "Harry",
+"lastName": "Potter",
+"age": 17,
+"password": "secret123"
 }

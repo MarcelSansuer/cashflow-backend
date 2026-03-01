@@ -3,44 +3,36 @@ package my.cashflow.account.infrastructure.services.account
 import my.cashflow.account.domain.account.AccountAggregate
 import my.cashflow.account.domain.account.AccountId
 import my.cashflow.account.domain.Money
-import my.cashflow.account.infrastructure.services.account.AccountEventStore
+import my.cashflow.account.infrastructure.repository.user.UserRepository
 import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
 class AccountService(
-    private val eventStore: AccountEventStore
+    private val eventStore: AccountEventStore,
+    private val userRepository: UserRepository
 ) : AccountServiceInterface {
-    /**
-     * Opens a new account with the given owner name and currency. If no currency is provided, it defaults to EUR.
-     *
-     * @param ownerName The name of the account owner.
-     * @param currency The currency of the account (optional, defaults to EUR).
-     * @return The ID of the newly opened account.
-     *
-     * @throws IllegalArgumentException if the owner name is blank or if the currency is invalid.
-     * @throws RuntimeException if there is an error while saving the account events to the event store.
-     */
+
     override fun openAccount(
+        ownerUserId: UUID,
+        creatorId: UUID,
         ownerName: String,
         currency: Currency
     ): AccountAggregate {
+        require(userRepository.existsById(ownerUserId)) {
+            "Owner user with ID $ownerUserId does not exist"
+        }
+        require(userRepository.existsById(creatorId)) {
+            "Creator user with ID $creatorId does not exist"
+        }
+
         val id = AccountId.new()
-        val (aggregate, event) = AccountAggregate.create(id, ownerName, currency)
+        val (aggregate, event) = AccountAggregate.create(id, ownerUserId, creatorId, ownerName, currency)
 
         eventStore.appendEvents(id, listOf(event))
         return aggregate
     }
 
-    /**
-     * Deposits the specified amount of money into the account with the given ID.
-     *
-     * @param accountId The ID of the account to deposit into.
-     * @param amount The amount of money to deposit.
-     *
-     * @throws IllegalArgumentException if the amount is zero or negative, or if the account ID is invalid.
-     * @throws RuntimeException if there is an error while loading or saving events from/to the event store.
-     */
     override fun deposit(accountId: AccountId, amount: Money): AccountAggregate {
         val (aggregate, event) = aggregateFor(accountId).deposit(amount)
 
@@ -48,44 +40,18 @@ class AccountService(
         return aggregate
     }
 
-    /**
-     * Withdraws the specified amount of money from the account with the given ID.
-     *
-     * @param accountId The ID of the account to withdraw from.
-     * @param amount The amount of money to withdraw.
-     *
-     * @throws IllegalArgumentException if the amount is zero or negative, or if the account ID is invalid.
-     * @throws RuntimeException if there is an error while loading or saving events from/to the event store, or if there are insufficient funds in the account.
-     */
     override fun withdraw(accountId: AccountId, amount: Money): AccountAggregate {
         val (aggregate, event) = aggregateFor(accountId).withdraw(amount)
         eventStore.appendEvents(accountId, listOf(event))
         return aggregate
     }
 
-    /**
-     * Retrieves the current balance of the account with the given ID.
-     *
-     * @param accountId The ID of the account to check.
-     * @return The current balance of the account.
-     *
-     * @throws IllegalArgumentException if the account ID is invalid.
-     * @throws RuntimeException if there is an error while loading events from the event store.
-     */
-    override fun getBalance(accountId: AccountId): Money {
+    override fun getBalance(accountId: AccountId): AccountAggregate {
         val events = eventStore.loadEvents(accountId)
         val aggregate = AccountAggregate.fromEvents(events)
-        return aggregate.balance
+        return aggregate
     }
 
-    /**
-     * Closes the account with the given ID.
-     *
-     * @param accountId The ID of the account to close.
-     *
-     * @throws IllegalArgumentException if the account ID is invalid.
-     * @throws RuntimeException if there is an error while loading or saving events from/to the event store.
-     */
     override fun closeAccount(accountId: AccountId) {
         val (_, event) = aggregateFor(accountId).close()
         eventStore.appendEvents(accountId, listOf(event))

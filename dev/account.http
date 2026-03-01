@@ -1,11 +1,13 @@
-@accountId = 4ea0f808-28e7-4a28-9ed8-117fa15b93f0
+@accountId = b27d2eb4-9210-4b1a-ae06-a3d944e59d0a
 
 ### create account
 POST http://localhost:8080/api/accounts
 Content-Type: application/json
 
 {
-  "ownerName": "Marcel",
+  "ownerName": "Tony Stark",
+  "ownerUserId": "ecd03205-17f1-4d2e-8708-552f0bd21b6f",
+  "creatorId": "db1c3cc6-aacc-4bc7-b198-58a84109fdf5",
   "currency": "EUR"
 }
 ###

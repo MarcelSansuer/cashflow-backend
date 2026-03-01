@@ -5,7 +5,7 @@ data class CreateUserRequest(
     val email: String,
     val firstName: String,
     val lastName: String,
-    val age: Int,
+    val age: Int?,
     val password: String,
 ){
     fun validate() {
@@ -13,7 +13,7 @@ data class CreateUserRequest(
         require(email.isNotBlank()) { "Email must not be blank" }
         require(firstName.isNotBlank()) { "First name must not be blank" }
         require(lastName.isNotBlank()) { "Last name must not be blank" }
-        require(age > 0) { "Age must be greater than 0" }
+        require(age != null && age > 0) { "Age must be greater than 0" }
         require(password.isNotBlank()) { "Password must not be blank" }
     }
 }
